@@ -4,6 +4,7 @@
 @import url('./04-core-code/ui/partials/left-panel.css');
 @import url('./04-core-code/ui/css/dialog.css');
 @import url('./04-core-code/ui/css/right-panel.css');
+@import url('./04-core-code/ui/css/f3-adjustments.css');
 @import url('./04-core-code/ui/css/virtual-keyboard.css');
 @import url('./04-core-code/ui/css/results-table.css');
 @import url('./04-core-code/ui/css/toast-notification.css');
@@ -20,20 +21,25 @@
 }
 
 /* --- Base Styles --- */
-html, body {
-    height: 100%; margin: 0;
+html,
+body {
+    height: 100%;
+    margin: 0;
     font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
-    background-color: #f0f2f5; overflow: hidden;
+    background-color: #f0f2f5;
+    overflow: hidden;
 }
 
 /* --- App Container Layout --- */
 .app-container {
-    display: flex; flex-direction: column;
+    display: flex;
+    flex-direction: column;
     height: 100%;
     width: 100%;
-    max-width: 1000px; margin: 0 auto;
+    max-width: 1000px;
+    margin: 0 auto;
     background-color: var(--app-bg-color);
-    box-shadow: 0 4px 20px rgba(0,0,0,0.1);
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
 }
 
 .results-panel {
