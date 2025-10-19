@@ -110,7 +110,6 @@ export class RightPanelComponent {
                     'slim': query(`#${DOM_IDS.F1_PRICE_SLIM}`),
                     'total': query(`#${DOM_IDS.F1_PRICE_TOTAL}`),
                     'rb-retail': query(`#${DOM_IDS.F1_RB_RETAIL}`),
-                    'rb-discount-amount': query(`#${DOM_IDS.F1_RB_DISCOUNT_AMOUNT}`),
                     'rb-price': query(`#${DOM_IDS.F1_RB_PRICE}`),
                     'sub-total': query(`#${DOM_IDS.F1_SUB_TOTAL}`),
                     'gst': query(`#${DOM_IDS.F1_GST}`),
@@ -126,7 +125,7 @@ export class RightPanelComponent {
                 inputElement.addEventListener('change', (event) => {
                     this.eventAggregator.publish(EVENTS.F2_VALUE_CHANGED, { id: event.target.id, value: event.target.value });
                 });
-                
+
                 inputElement.addEventListener('keydown', (event) => {
                     if (event.key === 'Enter') {
                         event.preventDefault();
@@ -189,7 +188,7 @@ export class RightPanelComponent {
             b25_netprofit: query('#f2-b25-netprofit'),
         };
     }
-    
+
     _cacheF4Elements() {
         const query = (id) => this.panelElement.querySelector(id);
         this.f4 = {
@@ -257,7 +256,7 @@ export class RightPanelComponent {
         const cordQty = ui.driveCordCount || 0;
         componentPrices['3m-cord'] = this.calculationService.calculateF1ComponentPrice('3m-cord', cordQty);
         this.f1.displays.qty['3m-cord'].textContent = cordQty;
-        
+
         const totalDualPairs = Math.floor(items.filter(item => item.dual === 'D').length / 2);
         const comboQty = (ui.f1.dual_combo_qty === null) ? totalDualPairs : ui.f1.dual_combo_qty;
         const slimQty = (ui.f1.dual_slim_qty === null) ? 0 : ui.f1.dual_slim_qty;
@@ -284,7 +283,6 @@ export class RightPanelComponent {
         if (document.activeElement !== this.f1.inputs.discount) {
             this.f1.inputs.discount.value = formatDisplay(discountPercentage) || '';
         }
-        this.f1.displays.price['rb-discount-amount'].textContent = formatPrice(discountAmount);
         this.f1.displays.price['rb-price'].textContent = formatPrice(rbPrice);
 
         // --- Final Summary Calculation ---
@@ -300,7 +298,7 @@ export class RightPanelComponent {
 
     _renderF2Tab(state) {
         if (!state || !state.ui.f2 || !this.f2.b2_winderPrice) return;
-        
+
         const f2State = state.ui.f2;
         const productSummary = state.quoteData.products[state.quoteData.currentProduct]?.summary;
         const accessories = productSummary?.accessories || {};
@@ -342,7 +340,7 @@ export class RightPanelComponent {
         this.f2.c14_installFee.textContent = formatIntegerCurrency(installFee);
         this.f2.c15_removalFee.textContent = formatIntegerCurrency(removalFee);
         this.f2.b16_surchargeFee.textContent = formatIntegerCurrency(surchargeFee);
-        
+
         this.f2.a17_totalSum.textContent = formatValue(f2State.totalSumForRbTime);
         this.f2.c17_1stRbPrice.textContent = formatDecimalCurrency(f2State.firstRbPrice);
         this.f2.b19_disRbPrice.textContent = formatDecimalCurrency(f2State.disRbPrice);
@@ -381,7 +379,7 @@ export class RightPanelComponent {
             // Force a re-render of F1 tab content when it's activated.
             this._renderF1Tab(this.state);
         }
-        
+
         if (targetContentId === '#f2-content') {
             this.eventAggregator.publish(EVENTS.F2_TAB_ACTIVATED);
         }
