@@ -435,6 +435,7 @@ export class RightPanelComponent {
     _renderF3Tab() {
         if (!this.f3.inputs.quoteId) return;
 
+        // Only fill if the fields are empty, to preserve manual changes.
         const formatDate = (date) => {
             const year = date.getFullYear();
             const month = String(date.getMonth() + 1).padStart(2, '0');
