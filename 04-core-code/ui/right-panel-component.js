@@ -49,6 +49,7 @@ export class RightPanelComponent {
 
         this._initializeF1Listeners();
         this._initializeF2Listeners();
+        this._initializeF3Listeners();
         this._initializeF4ButtonListeners();
 
         this.eventAggregator.subscribe(EVENTS.FOCUS_ELEMENT, ({ elementId }) => {
@@ -193,10 +194,69 @@ export class RightPanelComponent {
     _cacheF3Elements() {
         const query = (id) => this.panelElement.querySelector(id);
         this.f3 = {
-            quoteId: query('#f3-quote-id'),
-            issueDate: query('#f3-issue-date'),
-            dueDate: query('#f3-due-date'),
+            inputs: {
+                quoteId: query('#f3-quote-id'),
+                issueDate: query('#f3-issue-date'),
+                dueDate: query('#f3-due-date'),
+                customerName: query('#f3-customer-name'),
+                customerAddress: query('#f3-customer-address'),
+                customerPhone: query('#f3-customer-phone'),
+                customerEmail: query('#f3-customer-email'),
+                finalOfferPrice: query('#f3-final-offer-price'),
+                generalNotes: query('#f3-general-notes'),
+                termsConditions: query('#f3-terms-conditions'),
+            },
+            buttons: {
+                addQuote: query('#btn-add-quote'),
+            }
         };
+    }
+
+    _initializeF3Listeners() {
+        if (!this.f3.inputs.issueDate) return;
+
+        // --- Date Chaining Logic ---
+        this.f3.inputs.issueDate.addEventListener('input', (event) => {
+            const issueDateValue = event.target.value;
+            if (issueDateValue) {
+                const issueDate = new Date(issueDateValue);
+                // Adjust for timezone offset to prevent day-before issues
+                issueDate.setMinutes(issueDate.getMinutes() + issueDate.getTimezoneOffset());
+
+                const dueDate = new Date(issueDate);
+                dueDate.setDate(dueDate.getDate() + 14);
+
+                const year = dueDate.getFullYear();
+                const month = String(dueDate.getMonth() + 1).padStart(2, '0');
+                const day = String(dueDate.getDate()).padStart(2, '0');
+
+                this.f3.inputs.dueDate.value = `${year}-${month}-${day}`;
+            }
+        });
+
+        // --- Focus Jumping Logic ---
+        const focusOrder = [
+            'quoteId', 'issueDate', 'dueDate', 'customerName', 'customerAddress',
+            'customerPhone', 'customerEmail', 'finalOfferPrice', 'generalNotes', 'termsConditions'
+        ];
+
+        focusOrder.forEach((key, index) => {
+            const currentElement = this.f3.inputs[key];
+            if (currentElement) {
+                currentElement.addEventListener('keydown', (event) => {
+                    if (event.key === 'Enter' || (event.key === 'Tab' && !event.shiftKey)) {
+                        event.preventDefault();
+                        const nextIndex = index + 1;
+                        if (nextIndex < focusOrder.length) {
+                            const nextKey = focusOrder[nextIndex];
+                            this.f3.inputs[nextKey]?.focus();
+                        } else {
+                            this.f3.buttons.addQuote?.focus();
+                        }
+                    }
+                });
+            }
+        });
     }
 
     _cacheF4Elements() {
@@ -373,7 +433,7 @@ export class RightPanelComponent {
     }
 
     _renderF3Tab() {
-        if (!this.f3.quoteId) return;
+        if (!this.f3.inputs.quoteId) return;
 
         const formatDate = (date) => {
             const year = date.getFullYear();
@@ -388,12 +448,13 @@ export class RightPanelComponent {
         const day = String(now.getDate()).padStart(2, '0');
         const hours = String(now.getHours()).padStart(2, '0');
 
-        this.f3.quoteId.value = `RB${year}${month}${day}${hours}`;
-        this.f3.issueDate.value = formatDate(now);
-
-        const dueDate = new Date();
-        dueDate.setDate(now.getDate() + 14);
-        this.f3.dueDate.value = formatDate(dueDate);
+        if (!this.f3.inputs.quoteId.value) this.f3.inputs.quoteId.value = `RB${year}${month}${day}${hours}`;
+        if (!this.f3.inputs.issueDate.value) this.f3.inputs.issueDate.value = formatDate(now);
+        if (!this.f3.inputs.dueDate.value) {
+            const dueDate = new Date();
+            dueDate.setDate(now.getDate() + 14);
+            this.f3.inputs.dueDate.value = formatDate(dueDate);
+        }
     }
 
     _setActiveTab(clickedButton) {
