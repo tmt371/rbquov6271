@@ -23,7 +23,7 @@ export class CalculationService {
 
         const currentProductKey = quoteData.currentProduct;
         const currentProductData = quoteData.products[currentProductKey];
-        
+
         let firstError = null;
 
         const newItems = currentProductData.items.map((item, index) => {
@@ -31,7 +31,7 @@ export class CalculationService {
             if (item.width && item.height && item.fabricType) {
                 const priceMatrix = this.configManager.getPriceMatrix(item.fabricType);
                 const result = productStrategy.calculatePrice(item, priceMatrix);
-                
+
                 if (result.price !== null) {
                     newItem.linePrice = result.price;
                 } else if (result.error && !firstError) {
@@ -47,7 +47,7 @@ export class CalculationService {
         });
 
         const itemsTotal = newItems.reduce((sum, item) => sum + (item.linePrice || 0), 0);
-        
+
         let accessoriesTotal = 0;
         const currentSummary = currentProductData.summary;
         if (currentSummary && currentSummary.accessories) {
@@ -91,7 +91,7 @@ export class CalculationService {
 
         const { accessoryPriceKeyMap, accessoryMethodNameMap } = this.configManager.getAccessoryMappings();
         const priceKey = accessoryPriceKeyMap[accessoryName];
-        
+
         if (!priceKey) {
             console.error(`No sale price key found for accessory: ${accessoryName}`);
             return 0;
@@ -101,7 +101,7 @@ export class CalculationService {
         if (pricePerUnit === null) return 0;
 
         const methodName = accessoryMethodNameMap[accessoryName];
-        
+
         if (methodName && productStrategy[methodName]) {
             const args = (data.items) ? [data.items, pricePerUnit] : [data.count, pricePerUnit];
             return productStrategy[methodName](...args);
@@ -130,7 +130,7 @@ export class CalculationService {
 
         const { accessoryMethodNameMap } = this.configManager.getAccessoryMappings();
         const methodName = accessoryMethodNameMap[accessoryName];
-        
+
         if (methodName && productStrategy[methodName]) {
             const args = (data.items) ? [data.items, pricePerUnit] : [data.count, pricePerUnit];
             return productStrategy[methodName](...args);
@@ -160,7 +160,7 @@ export class CalculationService {
         if (typeof quantity !== 'number' || quantity < 0) {
             return 0;
         }
-        
+
         const f1KeyMap = {
             'winder': 'cost-winder',
             'motor': 'cost-motor',
@@ -205,7 +205,7 @@ export class CalculationService {
         const remotePrice = accessories.remoteCostSum || 0;
         const chargerPrice = accessories.chargerCostSum || 0;
         const cordPrice = accessories.cordCostSum || 0;
-        
+
         const f1State = uiState.f1;
         const f2State = uiState.f2;
 
@@ -246,7 +246,7 @@ export class CalculationService {
         const comboQtyF1 = (f1State.dual_combo_qty === null) ? totalDualPairsF1 : f1State.dual_combo_qty;
         const slimQtyF1 = (f1State.dual_slim_qty === null) ? 0 : f1State.dual_slim_qty;
 
-        const f1ComponentTotal = 
+        const f1ComponentTotal =
             this.calculateF1ComponentPrice('winder', winderQtyF1) +
             this.calculateF1ComponentPrice('motor', motorQtyF1) +
             this.calculateF1ComponentPrice('remote-1ch', remote1chQtyF1) +
@@ -259,7 +259,7 @@ export class CalculationService {
         const f1DiscountPercentage = f1State.discountPercentage || 0;
         const retailTotalFromF1 = quoteData.products.rollerBlind.summary.totalSum || 0;
         const f1_rb_price = retailTotalFromF1 * (1 - (f1DiscountPercentage / 100));
-        
+
         const f1SubTotal = f1ComponentTotal + f1_rb_price;
         const f1Gst = f1SubTotal * 0.10;
         const f1_final_total = f1SubTotal + f1Gst;
@@ -268,10 +268,11 @@ export class CalculationService {
         const rbProfit = disRbPrice - f1_rb_price;
         const validItemCount = items.filter(item => typeof item.linePrice === 'number' && item.linePrice > 0).length;
         const singleprofit = validItemCount > 0 ? rbProfit / validItemCount : 0;
-        
-        const sumProfit = sumPrice - f1_final_total;
+
+        // [MODIFIED] Corrected sumProfit and netProfit calculation
+        const sumProfit = sumPrice - f1SubTotal;
         const gst = sumPrice * 1.1; // Correctly calculate the total including GST
-        const netProfit = sumProfit - (gst - sumPrice); // Net Profit = Gross Profit - Tax Amount
+        const netProfit = gst - f1_final_total;
 
         return {
             totalSumForRbTime: totalSumFromQuickQuote,
